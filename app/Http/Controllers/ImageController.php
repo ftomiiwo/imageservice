@@ -3,6 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Guzzle\Tests\Plugin\Redirect;
+use App\Image;
+use Illuminate\Support\Facades\Input;
+use Carbon\Carbon;
+use Illuminate\Contracts\Filesystem\Filesystem;
+// use Illuminate\Http\File;
+// require_once 'vendor/autoload';
+
 
 class ImageController extends Controller
 {
@@ -34,12 +44,25 @@ class ImageController extends Controller
      */
     public function store(Request $request)
     {
+        $image = new Image();
         $this->validate($request, [
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'title' => 'required|max:255',
         ]);
 
-        $image = time().'.'.$request->image->getClientOriginalExtension();
-        $request->image->move(public_path('images/uploadedImages/'), $image);   
+        $s3 = Storage::disk('s3');
+        $image->title = $request->title;
+        $image->description = $request->description;
+        $file = $request->file('image');
+
+        if($file) {
+            $timestamp = str_replace([' ', ':'], '-', Carbon::now()->toDateTimeString());
+            $name = $request->get('title').$timestamp. '-' .$file->getClientOriginalName();
+            Storage::put('imageservice/'.$name, file_get_contents($file), 'public');
+            $image->filePath = $name;
+            $s3->put('imageservice/'.$name, File::get($file));
+            $file->move(public_path().'/images/', $name);
+        }
 
         return redirect('home')->with('status', 'Image Successfully Uploaded!'); 
     }
@@ -52,7 +75,8 @@ class ImageController extends Controller
      */
     public function show($id)
     {
-        //
+        $images = Image::all();
+        return view('image.showList', compact('images'));
     }
 
     /**
