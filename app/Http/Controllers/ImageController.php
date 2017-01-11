@@ -60,8 +60,9 @@ class ImageController extends Controller
             $name = $request->get('title').$timestamp. '-' .$file->getClientOriginalName();
             Storage::put('imageservice/'.$name, file_get_contents($file), 'public');
             $image->filePath = $name;
-            $s3->put('imageservice/'.$name, File::get($file));
             $file->move(public_path().'/images/', $name);
+            // $s3->put('imageservice/'.$name, File::get($file));
+            unlink(public_path().'/images/'.$name);
         }
 
         return redirect('home')->with('status', 'Image Successfully Uploaded!'); 
