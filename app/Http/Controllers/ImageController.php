@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Auth;
 use Guzzle\Tests\Plugin\Redirect;
 use App\Image;
 use Illuminate\Support\Facades\Input;
@@ -50,19 +51,21 @@ class ImageController extends Controller
             'title' => 'required|max:255',
         ]);
 
-        $s3 = Storage::disk('s3');
+        $Store = Storage::disk('s3');
         $image->title = $request->title;
         $image->description = $request->description;
+        $image->user = Auth::user()->id;
         $file = $request->file('image');
 
         if($file) {
             $timestamp = str_replace([' ', ':'], '-', Carbon::now()->toDateTimeString());
             $name = $request->get('title').$timestamp. '-' .$file->getClientOriginalName();
-            Storage::put('imageservice/'.$name, file_get_contents($file), 'public');
-            $image->filePath = $name;
-            $file->move(public_path().'/images/', $name);
-            $s3->put('imageservice/'.$name, File::get($file));
-            unlink(public_path().'/images/'.$name);
+            $image->filePath = '/imageservice/'.$name;
+            $Store->put('imageservice/'.$name, File::get($file), 'public');
+            $file->move(public_path().'/imageservice/', $name);
+            // $s3->put('imageservice/'.$name, File::get($file));file_get_contents
+            // \File::Delete(public_path().'/images/'.$name);
+            // unlink(public_path().'/images/'.$name);
         }
 
         return redirect('home')->with('status', 'Image Successfully Uploaded!'); 
