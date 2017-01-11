@@ -8,7 +8,8 @@
                 <div class="panel-heading">Dashboard</div>
 
                 <div class="panel-body">
-                    You are logged in!
+                    You are logged in! (Uploaded Images will be pulled and displayed here..)<br>
+                    Click <a href="/CreateImage">here</a> to upload.
                 </div>
             </div>
         </div>

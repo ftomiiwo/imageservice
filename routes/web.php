@@ -24,9 +24,9 @@ Route::get('/home', 'HomeController@index');
 Auth::routes();
 
 Route::get('/home', 'HomeController@index');
-Route::any('/CreateImage', 'ImageController@create');
-Route::post('/StoreImage', 'ImageController@store');
-Route::get('/showLists', 'ImageController@show' );
+Route::any('/CreateImage', ['middleware' => 'auth', 'uses' =>'ImageController@create']);
+Route::post('/StoreImage', ['middleware' => 'auth', 'uses' =>'ImageController@store']);
+Route::get('/showLists', ['middleware' => 'auth', 'uses' =>'ImageController@show']);
 
 Route::get('test', function() {
 	$s3 = Storage::disk('s3');

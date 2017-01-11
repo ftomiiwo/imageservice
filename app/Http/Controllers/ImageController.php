@@ -61,7 +61,7 @@ class ImageController extends Controller
             Storage::put('imageservice/'.$name, file_get_contents($file), 'public');
             $image->filePath = $name;
             $file->move(public_path().'/images/', $name);
-            // $s3->put('imageservice/'.$name, File::get($file));
+            $s3->put('imageservice/'.$name, File::get($file));
             unlink(public_path().'/images/'.$name);
         }
 
